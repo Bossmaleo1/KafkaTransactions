@@ -7,7 +7,7 @@ plugins {
 	kotlin("plugin.spring") version "1.9.24"
 }
 
-group = "com.appsdeveloperblog.estore"
+group = "com.appsdeveloperblog.ws"
 version = "0.0.1-SNAPSHOT"
 
 java {
@@ -20,14 +20,11 @@ repositories {
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation("org.springframework.boot:spring-boot-starter")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
-	implementation("org.springframework.kafka:spring-kafka")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.springframework.kafka:spring-kafka-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-	//implementation(project(":WithdrawalService"))
-	implementation(project(":Core"))
 }
 
 tasks.withType<KotlinCompile> {

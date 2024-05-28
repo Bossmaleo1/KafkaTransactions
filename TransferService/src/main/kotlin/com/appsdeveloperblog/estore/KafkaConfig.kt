@@ -1,5 +1,7 @@
 package com.appsdeveloperblog.estore
 
+//import java.util.Map
+
 import org.apache.kafka.clients.admin.NewTopic
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.springframework.beans.factory.annotation.Value
@@ -9,6 +11,7 @@ import org.springframework.kafka.config.TopicBuilder
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
+import org.springframework.kafka.transaction.KafkaTransactionManager
 
 @Configuration
 class KafkaConfig {
@@ -46,6 +49,9 @@ class KafkaConfig {
     @Value("\${spring.kafka.producer.properties.max.in.flight.requests.per.connection}")
     private val inflightRequests = 0
 
+    @Value("\${spring.kafka.producer.transaction-id-prefix}")
+    private val transactionalIdPrefix: String? = null
+
     fun producerConfigs(): Map<String, Any> {
         val props: MutableMap<String, Any> = HashMap()
         props[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers!!
@@ -59,6 +65,7 @@ class KafkaConfig {
         props[ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG] = idempotence
         props[ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION] =
             inflightRequests
+        props[ProducerConfig.TRANSACTIONAL_ID_CONFIG] = transactionalIdPrefix!!
 
         return props
     }
@@ -69,8 +76,13 @@ class KafkaConfig {
     }
 
     @Bean
-    fun kafkaTemplate(): KafkaTemplate<String, Any> {
-        return KafkaTemplate(producerFactory())
+    fun kafkaTemplate(producerFactory: ProducerFactory<String, Any>?): KafkaTemplate<String, Any> {
+        return KafkaTemplate(producerFactory!!)
+    }
+
+    @Bean
+    fun kafkaTransactionManager(producerFactory: ProducerFactory<String, Any>):KafkaTransactionManager<String, Any> {
+        return KafkaTransactionManager(producerFactory)
     }
 
     @Bean

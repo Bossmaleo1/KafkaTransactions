@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 class TransfersController(val transferService: TransferService) {
     private val LOGGER: Logger = LoggerFactory.getLogger(this.javaClass)
 
-    @PostMapping
+    @PostMapping()
     fun transfer(@RequestBody transferRestModel: TransferRestModel?): Boolean {
         return transferService.transfer(transferRestModel)
     }

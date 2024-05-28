@@ -18,6 +18,7 @@ import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 import org.springframework.kafka.support.serializer.JsonDeserializer
 import org.springframework.kafka.support.serializer.JsonSerializer
 import org.springframework.util.backoff.FixedBackOff
+import java.util.*
 
 @Configuration
 class KafkaConsumerConfiguration {
@@ -37,6 +38,10 @@ class KafkaConsumerConfiguration {
         config[ConsumerConfig.GROUP_ID_CONFIG] = environment!!.getProperty("spring.kafka.consumer.group-id")
         config[JsonDeserializer.TRUSTED_PACKAGES] =
             environment!!.getProperty("spring.kafka.consumer.properties.spring.json.trusted.packages")
+
+        config[ConsumerConfig.ISOLATION_LEVEL_CONFIG] =
+            environment!!.getProperty("spring.kafka.consumer.isolation-level", "READ_COMMITTED")
+                .lowercase()
 
         return DefaultKafkaConsumerFactory(config)
     }
@@ -68,7 +73,7 @@ class KafkaConsumerConfiguration {
 
     @Bean
     fun producerFactory(): ProducerFactory<String, Any> {
-        val config: MutableMap<String, Any?> = java.util.HashMap()
+        val config: MutableMap<String, Any?> = HashMap()
         config[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] =
             environment!!.getProperty("spring.kafka.consumer.bootstrap-servers")
         config[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = JsonSerializer::class.java

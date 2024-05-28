@@ -15,6 +15,14 @@
           </set>
         </option>
       </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/mockservice" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/mockservice" />
+          </set>
+        </option>
+      </GradleProjectSettings>
     </option>
   </component>
 </project>

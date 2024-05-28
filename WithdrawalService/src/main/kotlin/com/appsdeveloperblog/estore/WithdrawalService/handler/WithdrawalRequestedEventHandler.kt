@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component
 @Component
 @KafkaListener(topics = ["withdraw-money-topic"], containerFactory = "kafkaListenerContainerFactory")
 class WithdrawalRequestedEventHandler {
-    private val LOGGER: Logger = LoggerFactory.getLogger(this.javaClass)
+    //private val LOGGER: Logger = LoggerFactory.getLogger(this.javaClass)
 
     @KafkaHandler
     fun handle(@Payload withdrawalRequestedEvent: WithdrawalRequestedEvent) {
-        LOGGER.info("Received a new withdrawal event: {} ", withdrawalRequestedEvent.amount)
+       // LOGGER.info("Received a new withdrawal event: {} ", withdrawalRequestedEvent.amount)
     }
 }

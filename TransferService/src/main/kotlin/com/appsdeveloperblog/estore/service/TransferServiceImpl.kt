@@ -11,7 +11,9 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.RestTemplate
+import java.net.ConnectException
 
 @Service
 class TransferServiceImpl(
@@ -41,6 +43,7 @@ class TransferServiceImpl(
         return response
     }
 
+    @Transactional
     override fun transfer(transferRestModel: TransferRestModel?): Boolean {
         val withdrawalEvent = WithdrawalRequestedEvent(
             transferRestModel!!.senderId,

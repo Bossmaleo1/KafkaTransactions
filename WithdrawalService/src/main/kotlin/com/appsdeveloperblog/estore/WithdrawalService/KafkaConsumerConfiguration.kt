@@ -18,11 +18,12 @@ import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 import org.springframework.kafka.support.serializer.JsonDeserializer
 import org.springframework.kafka.support.serializer.JsonSerializer
 import org.springframework.util.backoff.FixedBackOff
+import java.util.*
 
 @Configuration
 class KafkaConsumerConfiguration(
     @Autowired
-    var environment: Environment? = null
+    val environment: Environment
 ) {
 
     @Bean
@@ -30,14 +31,18 @@ class KafkaConsumerConfiguration(
         val config: MutableMap<String, Any?> = HashMap()
 
         config[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] =
-            environment!!.getProperty("spring.kafka.consumer.bootstrap-servers")
+            environment.getProperty("spring.kafka.consumer.bootstrap-servers")
         config[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
         config[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] =
             ErrorHandlingDeserializer::class.java
         config[ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS] = JsonDeserializer::class.java
-        config[ConsumerConfig.GROUP_ID_CONFIG] = environment!!.getProperty("spring.kafka.consumer.group-id")
+        config[ConsumerConfig.GROUP_ID_CONFIG] = environment.getProperty("spring.kafka.consumer.group-id")
         config[JsonDeserializer.TRUSTED_PACKAGES] =
-            environment!!.getProperty("spring.kafka.consumer.properties.spring.json.trusted.packages")
+            environment.getProperty("spring.kafka.consumer.properties.spring.json.trusted.packages")
+
+        config[ConsumerConfig.ISOLATION_LEVEL_CONFIG] =
+            environment.getProperty("spring.kafka.consumer.isolation-level", "READ_COMMITED")
+                .lowercase(Locale.getDefault())
 
         return DefaultKafkaConsumerFactory(config)
     }
@@ -71,10 +76,11 @@ class KafkaConsumerConfiguration(
     fun producerFactory(): ProducerFactory<String, Any> {
         val config: MutableMap<String, Any?> = HashMap()
         config[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] =
-            environment!!.getProperty("spring.kafka.consumer.bootstrap-servers")
+            environment.getProperty("spring.kafka.consumer.bootstrap-servers")
         config[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = JsonSerializer::class.java
         config[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
 
         return DefaultKafkaProducerFactory(config)
     }
+
 }
