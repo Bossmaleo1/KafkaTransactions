@@ -1,10 +1,14 @@
 package com.appsdeveloperblog.estore.service
 
 import com.appsdeveloperblog.estore.error.TransferServiceException
+import com.appsdeveloperblog.estore.io.TransferEntity
+import com.appsdeveloperblog.estore.io.TransferRepository
 import com.appsdeveloperblog.estore.model.TransferRestModel
 import com.appsdeveloperblog.payments.ws.events.DepositRequestedEvent
 import com.appsdeveloperblog.payments.ws.events.WithdrawalRequestedEvent
+import org.apache.kafka.common.Uuid
 import org.slf4j.LoggerFactory
+import org.springframework.beans.BeanUtils
 import org.springframework.core.env.Environment
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -19,7 +23,8 @@ import java.net.ConnectException
 class TransferServiceImpl(
     private var kafkaTemplate: KafkaTemplate<String?, Any?>? = null,
     private var environment: Environment? = null,
-    private var restTemplate: RestTemplate? = null
+    private var restTemplate: RestTemplate? = null,
+    private var transferRepository: TransferRepository? = null
 ) : TransferService {
     companion object {
         private val LOGGER = LoggerFactory.getLogger(TransferServiceImpl::class.java)
@@ -43,7 +48,7 @@ class TransferServiceImpl(
         return response
     }
 
-    @Transactional
+    @Transactional("transactionManager")
     override fun transfer(transferRestModel: TransferRestModel?): Boolean {
         val withdrawalEvent = WithdrawalRequestedEvent(
             transferRestModel!!.senderId,
@@ -55,8 +60,20 @@ class TransferServiceImpl(
             transferRestModel.recepientId,
             transferRestModel.amount
         )
+        //save record to a database table
+        val transferEntity = transferRestModel.senderId?.let {
+            transferRestModel.amount?.let { it1 ->
+                TransferEntity(
+                    transferId = Uuid.randomUuid().toString(),
+                    senderId = it,
+                    recepientId = transferRestModel.recepientId,
+                    amount = it1
+                )
+            }
+        }
 
         try {
+            transferRepository!!.save(transferEntity!!)
             kafkaTemplate!!.send(environment!!.getProperty("withdraw-money-topic", "withdraw-money-topic"), withdrawalEvent)
             LOGGER.info(String.format("Sent event to withdrawal topic."))
 

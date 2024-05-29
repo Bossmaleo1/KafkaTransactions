@@ -2,6 +2,7 @@ package com.appsdeveloperblog.estore
 
 //import java.util.Map
 
+import jakarta.persistence.EntityManagerFactory
 import org.apache.kafka.clients.admin.NewTopic
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.springframework.beans.factory.annotation.Value
@@ -12,6 +13,7 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.transaction.KafkaTransactionManager
+import org.springframework.orm.jpa.JpaTransactionManager
 
 @Configuration
 class KafkaConfig {
@@ -80,9 +82,14 @@ class KafkaConfig {
         return KafkaTemplate(producerFactory!!)
     }
 
-    @Bean
+    @Bean("kafkaTransactionManager")
     fun kafkaTransactionManager(producerFactory: ProducerFactory<String, Any>):KafkaTransactionManager<String, Any> {
         return KafkaTransactionManager(producerFactory)
+    }
+
+    @Bean("transactionManager")
+    fun jpaTransactionManager(entityManagerFactory: EntityManagerFactory): JpaTransactionManager {
+        return JpaTransactionManager(entityManagerFactory)
     }
 
     @Bean
